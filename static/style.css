@@ -497,6 +497,12 @@ body.view-3d :is(#zoom-hint, #reset-zoom, .key, .key-text, label:has(#ghosts)) {
   font-size: 16px;
 }
 
+/* the shortcut to the discs that fly like this one, under its numbers */
+.similar {
+  display: block;
+  margin: 2px 0 8px;
+}
+
 /* the estimated flight path */
 .flight svg {
   display: block;
@@ -668,7 +674,7 @@ body.view-3d :is(#zoom-hint, #reset-zoom, .key, .key-text, label:has(#ghosts)) {
   order: 1;
 }
 
-#inline-detail > :is(h2, .muted, .ratings) {
+#inline-detail > :is(h2, .muted, .ratings, .similar) {
   order: 0;
 }
 
@@ -931,7 +937,7 @@ body.view-3d :is(#zoom-hint, #reset-zoom, .key, .key-text, label:has(#ghosts)) {
     order: 1;
   }
 
-  #detail-body > :is(h2, .muted, .ratings) {
+  #detail-body > :is(h2, .muted, .ratings, .similar) {
     order: 0;
   }
 
@@ -961,7 +967,7 @@ body.view-3d :is(#zoom-hint, #reset-zoom, .key, .key-text, label:has(#ghosts)) {
     max-height: calc(100% - 16px);
   }
 
-  #inline-detail:not(.expanded) > :not(h2, .muted, .ratings, .expand) {
+  #inline-detail:not(.expanded) > :not(h2, .muted, .ratings, .similar, .expand) {
     display: none;
   }
 

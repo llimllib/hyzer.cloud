@@ -187,8 +187,15 @@ async function init() {
   chart.setHand(hand);
   $("#reset-zoom").addEventListener("click", () => chart.setZoom(null));
   $("#empty-reset").addEventListener("click", () => chart.setZoom(null));
-  // the toggle lives inside cards that are rebuilt as discs are opened
+  // the toggle and the similar button live inside cards that are rebuilt as
+  // discs are opened
   document.addEventListener("click", (e) => {
+    const similar = e.target.closest?.("[data-similar]");
+    if (similar) {
+      const d = allDiscs.find((x) => String(x.id) === similar.dataset.similar);
+      if (d) showSimilar(d);
+      return;
+    }
     const pick = e.target.closest?.("[data-hand]");
     if (!pick || pick.dataset.hand === hand) return;
     hand = pick.dataset.hand;
@@ -330,6 +337,9 @@ function uiParams() {
   if (view === "3d") p.set("view", "3d");
   return p;
 }
+
+// the URL parameters that set how the chart looks, rather than what it shows
+const DISPLAY_PARAMS = ["color", "ghosts", "hand", "view"];
 
 function saveURL() {
   const qs = uiParams().toString();
@@ -691,9 +701,28 @@ function detailCard(d, desc) {
     <h2>${esc(d.model)}</h2>
     <div class="muted">${esc(d.brand)}</div>
     ${ratings(d)}
+    <button type="button" class="similar" data-similar="${esc(d.id)}">Show similar discs</button>
     <dl>${specs.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("")}</dl>
     ${desc ? `<p>${esc(desc)}</p>` : ""}
     ${d.link ? `<p><a href="${esc(d.link)}" target="_blank" rel="noopener">View at Marshall Street →</a></p>` : ""}`;
+}
+
+// showSimilar filters for the discs that fly like d: the same speed, and turn
+// and fade each within one of its. Glide is left out, as the least trustworthy
+// of the numbers. The other filters are reset, but the display settings kept
+function showSimilar(d) {
+  const ui = uiParams();
+  const p = new URLSearchParams();
+  for (const key of DISPLAY_PARAMS) if (ui.has(key)) p.set(key, ui.get(key));
+  p.set("speed_min", d.speed);
+  p.set("speed_max", d.speed);
+  for (const r of ["turn", "fade"]) {
+    p.set(`${r}_min`, d[r] - 1);
+    p.set(`${r}_max`, d[r] + 1);
+  }
+  $("#detail").close();
+  restore(p);
+  update();
 }
 
 async function showDetail(d) {
