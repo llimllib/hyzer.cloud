@@ -187,6 +187,12 @@ async function init() {
   chart.setHand(hand);
   $("#reset-zoom").addEventListener("click", () => chart.setZoom(null));
   $("#empty-reset").addEventListener("click", () => chart.setZoom(null));
+  $("#empty-search").addEventListener("click", () => {
+    const p = displayParams();
+    p.set("q", filters.elements.q.value.trim());
+    restore(p);
+    update();
+  });
   // the toggle and the similar button live inside cards that are rebuilt as
   // discs are opened
   document.addEventListener("click", (e) => {
@@ -340,6 +346,15 @@ function uiParams() {
 
 // the URL parameters that set how the chart looks, rather than what it shows
 const DISPLAY_PARAMS = ["color", "ghosts", "hand", "view"];
+
+// displayParams returns the URL parameters for the display settings alone: a
+// fresh start on the filters that keeps how the chart looks
+function displayParams() {
+  const ui = uiParams();
+  const p = new URLSearchParams();
+  for (const key of DISPLAY_PARAMS) if (ui.has(key)) p.set(key, ui.get(key));
+  return p;
+}
 
 function saveURL() {
   const qs = uiParams().toString();
@@ -579,8 +594,19 @@ function setDrawer(open) {
 function showEmpty(visible) {
   const zoomed = chart.discs.length > 0;
   $("#empty").hidden = visible > 0;
-  $("#empty-text").textContent = zoomed ? "No discs in the zoomed area match these filters." : "No discs match these filters.";
   $("#empty-reset").hidden = !zoomed;
+  // a search for a disc the other filters hide, like the Heat after showing
+  // the discs similar to a Destroyer, is offered on its own. This is the query
+  // searching from a fresh start makes, where the popular filter is off
+  const q = filters.elements.q.value.trim();
+  const found = visible === 0 && !zoomed && q ? applyFilters(new URLSearchParams({ q, oop: "0" })).length : 0;
+  $("#empty-search").hidden = !found;
+  $("#empty-search").textContent = found === 1 ? "Show it" : `Show ${found} discs`;
+  $("#empty-text").textContent = zoomed
+    ? "No discs in the zoomed area match these filters."
+    : found
+      ? `No discs match these filters, but ${found} ${found === 1 ? "disc matches" : "discs match"} "${q}".`
+      : "No discs match these filters.";
 }
 
 let legendDiscs = [];
@@ -711,9 +737,7 @@ function detailCard(d, desc) {
 // and fade each within one of its. Glide is left out, as the least trustworthy
 // of the numbers. The other filters are reset, but the display settings kept
 function showSimilar(d) {
-  const ui = uiParams();
-  const p = new URLSearchParams();
-  for (const key of DISPLAY_PARAMS) if (ui.has(key)) p.set(key, ui.get(key));
+  const p = displayParams();
   p.set("speed_min", d.speed);
   p.set("speed_max", d.speed);
   for (const r of ["turn", "fade"]) {
