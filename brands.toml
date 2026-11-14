@@ -163,6 +163,7 @@ source = "maintainer's recollection, unverified"
 
 [brands.Innova]
 pdga = ["Innova Champion Discs", "Innova Factory Store"]
+website = "https://www.innovadiscs.com/"
 
 [brands."Jester Disc Golf"]
 pdga = ["Jester Disc Golf"]

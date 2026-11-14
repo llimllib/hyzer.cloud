@@ -1,15 +1,18 @@
 {
   "network": {
     "allowedDomains": [
+      "discraft.com",
+      "*.discraft.com",
       "innovadiscs.com",
-      "*.pdga.com",
-      "pdga.com",
-      "*.rpmdiscs.com",
-      "rpmdiscs.com",
+      "*.innovadiscs.com",
       "*.marshallstreetdiscgolf.com",
       "marshallstreetdiscgolf.com",
       "*.otbdiscs.com",
-      "otbdiscs.com"
+      "otbdiscs.com",
+      "*.pdga.com",
+      "pdga.com",
+      "*.rpmdiscs.com",
+      "rpmdiscs.com"
     ]
   }
 }

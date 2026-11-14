@@ -23,6 +23,7 @@ SOURCES = {
     # every disc the PDGA has approved, with its measured specs; no flight numbers
     "pdga": ("https://www.pdga.com/technical-standards/equipment-certification/discs/export", "pdga/discs.csv"),
     # manufacturers, whose own numbers win over the retailer's
+    "innova": ("https://www.innovadiscs.com/disc-golf-discs/disc-comparison/", "innova/disc-comparison.html"),
     "rpm": ("https://www.rpmdiscs.com/disc-golf-discs/", "rpm/disc-golf-discs.html"),
 }
 

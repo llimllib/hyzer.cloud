@@ -1,4 +1,10 @@
 {
+  "innova": {
+    "fetched": "2026-11-14T03:08:06+00:00",
+    "file": "innova/disc-comparison.html",
+    "sha256": "ac556d4ba0729449a270a901cc820ce28790edc14f94786a8987a66893ad051b",
+    "url": "https://www.innovadiscs.com/disc-golf-discs/disc-comparison/"
+  },
   "marshall": {
     "fetched": "2026-11-14T03:01:35+00:00",
     "file": "marshall/flightguide.html",

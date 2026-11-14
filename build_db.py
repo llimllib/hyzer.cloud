@@ -98,9 +98,10 @@ def num(s):
 
 def slug(s):
     """Fold a name for matching across sources: RPM writes Tākapu where
-    Marshall Street writes Takapu, so accents go before punctuation does."""
+    Marshall Street writes Takapu, so accents go before punctuation does.
+    A + is part of a name, not punctuation: Innova's Roc+ isn't its Roc."""
     s = unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode()
-    return re.sub(r"[^a-z0-9]", "", s.lower())
+    return re.sub(r"[^a-z0-9]", "", s.lower().replace("+", "plus"))
 
 
 def marshall_stock(text):
@@ -256,6 +257,89 @@ def parse_rpm(path):
     return list(rows.values())
 
 
+class TableParser(HTMLParser):
+    """Collect the rows of the <table> with the given id: each row's cell
+    texts, and the first link in it. Text inside attributes, like Innova's
+    tooltips of HTML in title="", isn't data and doesn't end up in a cell."""
+
+    def __init__(self, table_id):
+        super().__init__(convert_charrefs=True)
+        self.table_id = table_id
+        self.rows = []
+        self.depth = 0  # of <table> from ours down; 0 outside it
+        self.row = None
+        self.cell = None
+
+    def handle_starttag(self, tag, attrs):
+        attrs = dict(attrs)
+        if tag == "table" and (self.depth or attrs.get("id") == self.table_id):
+            self.depth += 1
+        elif self.depth != 1:
+            return
+        elif tag == "tr":
+            self.row = {"cells": [], "url": None}
+        elif tag in ("td", "th") and self.row is not None:
+            self.cell = ""
+        elif tag == "a" and self.row is not None and self.row["url"] is None:
+            self.row["url"] = attrs.get("href")
+
+    def handle_endtag(self, tag):
+        if tag == "table" and self.depth:
+            self.depth -= 1
+        elif self.depth != 1:
+            return
+        elif tag in ("td", "th") and self.cell is not None:
+            self.row["cells"].append(self.cell.strip())
+            self.cell = None
+        elif tag == "tr" and self.row is not None:
+            self.rows.append(self.row)
+            self.row = None
+
+    def handle_data(self, data):
+        if self.depth == 1 and self.cell is not None:
+            self.cell += data
+
+
+# Innova's comparison table, which they describe as "every Innova disc into
+# one list": stock molds only, no signature or special editions
+INNOVA_COLUMNS = ["DISC", "SPEED", "GLIDE", "TURN", "FADE", "ABBR.", "Available", "Disc Type"]
+# Innova's names for discs Marshall Street names otherwise. Innova's own disc
+# pages call the KC and Yeti "Pro" Aviars. Their JK Aviar is made from the
+# Aviar driver mold, so it isn't Marshall Street's JK Pro Aviar-X, which they
+# link to the PDGA's Aviar XD
+INNOVA_NAMES = {
+    "Aviar": "Aviar P&A",
+    "Classic Aviar": "Aviar Classic",
+    "KC Aviar": "KC Pro Aviar",
+    "Yeti Aviar": "Yeti Pro Aviar",
+}
+
+
+def parse_innova(path):
+    parser = TableParser("disc-comparison")
+    parser.feed(path.read_text())
+    if not parser.rows:
+        return []
+
+    header, *rows = parser.rows
+    if header["cells"] != INNOVA_COLUMNS:
+        raise ValueError(f"innova: comparison table's columns are now {header['cells']}")
+    discs = []
+    for row in rows:
+        model, *numbers = row["cells"][:5]
+        try:
+            speed, glide, turn, fade = (num(n) for n in numbers)
+        except (TypeError, ValueError):
+            speed = None
+        if not model or None in (speed, glide, turn, fade):
+            raise ValueError(f"innova: no flight numbers for {model!r}: {numbers}")
+        discs.append({"brand": "Innova", "model": INNOVA_NAMES.get(model, model), "speed": speed, "glide": glide,
+                      "turn": turn, "fade": fade, "url": row["url"]})  # fmt: skip
+    if stale := set(INNOVA_NAMES) - {row["cells"][0] for row in rows}:
+        raise ValueError(f"innova: INNOVA_NAMES renames discs Innova no longer lists: {', '.join(sorted(stale))}")
+    return discs
+
+
 # the export's columns, and ours. The CSV is read by header, so a renamed or
 # missing column fails the build rather than shifting values into the wrong one
 PDGA_COLUMNS = {
@@ -297,7 +381,7 @@ def parse_pdga(path):
 
 # the manufacturers fetch.py downloads, whose numbers override Marshall
 # Street's, and the parser for each
-MANUFACTURERS = {"rpm": parse_rpm}
+MANUFACTURERS = {"innova": parse_innova, "rpm": parse_rpm}
 
 
 def disc_index(discs):
@@ -636,6 +720,8 @@ def merge(discs, name, rows):
         if len(matches) > 1:
             raise ValueError(f"{name}: {r['brand']} {r['model']} matches discs {[d['id'] for d in matches]}")
         d = matches[0] if matches else None
+        if d and d["id"] in ids:
+            raise ValueError(f"{name}: two of its discs match {d['brand']} {d['model']} ({d['id']}), the second {r['model']!r}")
         ids.append(d and d["id"])
         if not d:
             unmatched.append(r["model"])

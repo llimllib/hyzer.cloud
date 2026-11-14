@@ -18,6 +18,7 @@ checkout gives the same database every time.
 | name     | page                                               | provides |
 |----------|----------------------------------------------------|----------|
 | marshall | https://www.marshallstreetdiscgolf.com/flightguide | every disc and all its data |
+| innova   | https://www.innovadiscs.com/disc-golf-discs/disc-comparison/ | Innova's flight numbers |
 | rpm      | https://www.rpmdiscs.com/disc-golf-discs/          | RPM's flight numbers |
 | pdga     | https://www.pdga.com/technical-standards/equipment-certification/discs/export | every PDGA approved disc, and its specs |
 
@@ -155,5 +156,9 @@ where m.source = 'marshall' and s.source != 'marshall'
 3. Add its brand to `brands.toml` if it's new, and set its `website`.
 4. Run `mise run build` and read the report. Discs match on brand and model
    name, ignoring case, accents and punctuation (RPM's Tākapu is Marshall
-   Street's Takapu). A name that fails to match shows up in the report as
-   on one side only.
+   Street's Takapu), though not `+`: Innova's Roc+ isn't its Roc. A name
+   that fails to match shows up in the report as on one side only. Where
+   the two name one disc differently, have the parser rename it to
+   Marshall Street's name, as `INNOVA_NAMES` does for Innova's Aviars, and
+   fail if a rename stops matching. The build fails if two of a
+   manufacturer's discs match one of Marshall Street's.
