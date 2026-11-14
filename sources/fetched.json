@@ -1,20 +1,20 @@
 {
   "marshall": {
-    "fetched": "2026-10-14T02:57:57+00:00",
+    "fetched": "2026-11-14T03:01:35+00:00",
     "file": "marshall/flightguide.html",
-    "sha256": "ff6fa62d79e3fd89943d3934fad466197df265d97e8c8883fffdc5c9224c4333",
+    "sha256": "207db15ab40089940acc11219d9c10f95e1cac92d4bd82fb063086d1448c49dd",
     "url": "https://www.marshallstreetdiscgolf.com/flightguide"
   },
   "pdga": {
-    "fetched": "2026-10-14T11:44:39+00:00",
+    "fetched": "2026-11-14T03:01:35+00:00",
     "file": "pdga/discs.csv",
-    "sha256": "26a2e80765d33fb7c2bcaedc004a3b5b6404563532509f9f0df36544a8499fff",
+    "sha256": "4696272a975153988dc0f59439faafbf6f64a0d7ac0fb923ddea3fb8a330ee85",
     "url": "https://www.pdga.com/technical-standards/equipment-certification/discs/export"
   },
   "rpm": {
-    "fetched": "2026-10-14T02:57:58+00:00",
+    "fetched": "2026-11-14T03:01:41+00:00",
     "file": "rpm/disc-golf-discs.html",
-    "sha256": "8f0859c617d0a17baa44f2faf71aa6cbb27ac189a9300578987fab1e2d9ba80f",
+    "sha256": "380015b5be0334397a9bb2ae243171369877aa596660af7544d35cb83d382520",
     "url": "https://www.rpmdiscs.com/disc-golf-discs/"
   }
 }
