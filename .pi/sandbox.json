@@ -1,6 +1,7 @@
 {
   "network": {
     "allowedDomains": [
+      "innovadiscs.com",
       "*.pdga.com",
       "pdga.com",
       "*.rpmdiscs.com",
