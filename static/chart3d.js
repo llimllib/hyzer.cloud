@@ -11,6 +11,7 @@
 
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { innerSize } from "./chart.js";
 
 // the plot is a cube this many units on a side, whatever the axes' ranges
 const SIZE = 10;
@@ -106,8 +107,9 @@ export class Chart3D {
   }
 
   resize() {
-    const w = this.container.clientWidth;
-    const h = Math.max(MIN_HEIGHT, this.container.clientHeight);
+    const inner = innerSize(this.container);
+    const w = inner.w;
+    const h = Math.max(MIN_HEIGHT, inner.h);
     if (!w) return;
     this.renderer.setSize(w, h);
     this.camera.aspect = w / h;

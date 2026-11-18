@@ -59,6 +59,20 @@ function fit(values, minHalf, bounds) {
   return [d0, d1];
 }
 
+// innerSize is the room inside node, less any scrollbars, rounded down.
+// clientWidth and clientHeight round to the nearest pixel, so on a zoomed page,
+// or a phone, where the box is fractional, they can round up, and a plot that
+// size overflows by a fraction of a pixel. Firefox and Safari show scrollbars
+// for that, which shrink the box, which shrinks the plot so it fits, which
+// drops the scrollbars, which grows the box, endlessly
+export function innerSize(node) {
+  const box = node.getBoundingClientRect();
+  return {
+    w: Math.max(0, Math.floor(box.width) - (node.offsetWidth - node.clientWidth)),
+    h: Math.max(0, Math.floor(box.height) - (node.offsetHeight - node.clientHeight)),
+  };
+}
+
 export function domainFor(discs, extent) {
   const speedBounds = [extent.speed.min - PAD, extent.speed.max + PAD];
   const stabBounds = [
@@ -248,8 +262,9 @@ export class Chart {
   }
 
   measure() {
-    const w = this.container.clientWidth;
-    const h = Math.max(MIN_HEIGHT, this.container.clientHeight);
+    const inner = innerSize(this.container);
+    const w = inner.w;
+    const h = Math.max(MIN_HEIGHT, inner.h);
     this.size = { w, h };
     this.margin = w < NARROW ? NARROW_MARGIN : MARGIN;
     const m = this.margin;
